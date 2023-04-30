@@ -127,7 +127,7 @@ class NNUE(pl.LightningModule):
 
   lr - the initial learning rate
   """
-  def __init__(self, feature_set, lambda_=1.0, gamma=0.992, lr=8.75e-4, num_psqt_buckets=8, num_ls_buckets=8):
+  def __init__(self, feature_set, lambda_=1.0, start_lambda_=1.0, end_lambda_=1.0, max_epoch=800, gamma=0.992, lr=8.75e-4, num_psqt_buckets=8, num_ls_buckets=8):
     super(NNUE, self).__init__()
     self.num_psqt_buckets = num_psqt_buckets
     self.num_ls_buckets = num_ls_buckets
@@ -135,6 +135,9 @@ class NNUE(pl.LightningModule):
     self.feature_set = feature_set
     self.layer_stacks = LayerStacks(self.num_ls_buckets)
     self.lambda_ = lambda_
+    self.start_lambda = start_lambda_
+    self.end_lambda = end_lambda_
+    self.max_epoch = max_epoch
     self.gamma = gamma
     self.lr = lr
 
@@ -294,7 +297,8 @@ class NNUE(pl.LightningModule):
     t = outcome
     p = (score / in_scaling).sigmoid()
 
-    pt = p * self.lambda_ + t * (1.0 - self.lambda_)
+    actual_lambda = self.start_lambda + (self.end_lambda - self.start_lambda) * (self.current_epoch / self.max_epoch)
+    pt = p * actual_lambda + t * (1.0 - actual_lambda)
 
     loss = torch.pow(torch.abs(pt - q), 2.6).mean()
 
