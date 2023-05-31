@@ -60,9 +60,9 @@ def main():
     nnue = torch.load(args.resume_from_model)
     nnue.set_feature_set(feature_set)
     nnue.lambda_ = args.lambda_
-    nnue.start_lambda = start_lambda
-    nnue.end_lambda = end_lambda
-    nnue.max_epoch = max_epoch
+    nnue.start_lambda = args.start_lambda
+    nnue.end_lambda = args.end_lambda
+    nnue.max_epoch = args.max_epochs
     # we can set the following here just like that because when resuming
     # from .pt the optimizer is only created after the training is started
     nnue.gamma = args.gamma
